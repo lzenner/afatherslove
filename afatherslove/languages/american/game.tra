@@ -1,0 +1,17 @@
+/////////////////
+// SOUL DAGGER //
+/////////////////
+@1000 	= ~Skie's Soultaker Dagger~
+@1001 	= ~This dagger weighs heavily in your hand and is warm to the touch. Merely having it on your person makes you feel uneasy for some reason. The gem mounted in the hilt seems to have an inner light of some sort, though how it can have such illumination, you can only guess.
+
+STATISTICS:
+
+Damage: 1d4 (piercing)
+Speed Factor: 2 
+Proficiency Type: Small Sword
+Type: One-handed
+Requires:
+ 3 Strength
+
+Weight: 1~
+

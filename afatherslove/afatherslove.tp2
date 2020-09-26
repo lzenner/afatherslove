@@ -1,0 +1,101 @@
+BACKUP ~weidu_external/backup/framedagain~
+SUPPORT ~For help troubleshooting installation problems, go to the Framed Again forum at forums.gibberlings3.net ~
+VERSION ~v0.1~
+
+README ~framedagain/readme.framedagain.%LANGUAGE%.txt~ ~framedagain/readme.framedagain.english.txt~
+
+ALWAYS
+   ACTION_IF !VARIABLE_IS_SET deja_vu BEGIN
+      // Global static variables used by WeiDU
+      OUTER_SPRINT mod_root "framedagain"
+      OUTER_SPRINT external_loc "weidu_external"
+      OUTER_SPRINT tra_base "languages"
+      OUTER_SPRINT base_language "american"
+      OUTER_SPRINT workspace "%external_loc%/workspace/%mod_root%"
+      OUTER_SPRINT tra_loc "%workspace%/%tra_base%"
+
+      // Makes external working directories
+      // And copies language files to them
+      INCLUDE ~%mod_root%/lib/run_once.tpa~
+      LAF DO_RUN_ONCE END
+
+      // Variables used to point to files
+      ACTION_IF GAME_IS ~eet~ BEGIN
+         INCLUDE ~EET/other/cpmvars/eet_cpmvars.tpa~
+      END
+      INCLUDE ~%mod_root%/lib/#l_cmpvars.tpa~
+
+      // Library functions used throughout
+      INCLUDE ~%mod_root%/lib/alter_script.tpa~
+      INCLUDE ~%mod_root%/lib/update_bcs.tpa~
+   END
+
+   // This needs to be run before every component for some reason
+   // It has something to do with languages that use a different character set
+   ACTION_DEFINE_ARRAY thismod_noconvert BEGIN setup END
+   ACTION_DEFINE_ARRAY thismod_reload BEGIN main_game game cases END
+
+   LAF HANDLE_CHARSETS 
+      INT_VAR 
+         infer_charsets = 1 
+      STR_VAR 
+         iconv_path = EVAL "%mod_root%/%tra_base%/iconv"
+         tra_path = EVAL "%tra_loc%"
+         noconvert_array = thismod_noconvert
+         reload_array = thismod_reload
+   END
+
+   ACTION_IF ((FILE_EXISTS ~dlc/sod-dlc.zip~) OR (FILE_EXISTS ~sod-dlc.zip~)) THEN BEGIN
+      FAIL @1 /* ~Modmerge or Argent's DLC Merger is required before mods can be installed on this game.~ */
+   END
+   ACTION_IF (NOT GAME_IS ~bg2ee eet~) BEGIN
+      FAIL @2 /* ~This mod is requires BG2EE or EET~ */
+   END
+
+   ACTION_IF !VARIABLE_IS_SET deja_vu BEGIN
+      // This actually installs changes to a 2da file so want it to run after the game check
+      INCLUDE ~%mod_root%/lib/cases.tpa~
+      LAF INSTALL_PROPER_CASES END
+
+      OUTER_SET deja_vu = 1
+   END
+END
+
+// Can't use variables here for some reason
+// Not sure why we use both folders, but that's what the example did
+LANGUAGE ~American English~ ~american~   
+   ~framedagain/languages/american/setup.tra~
+   ~weidu_external/workspace/framedagain/languages/american/setup.tra~
+   ~framedagain/languages/american/game.tra~
+   ~weidu_external/workspace/framedagain/languages/american/game.tra~
+   ~framedagain/languages/american/cases.tra~
+   ~weidu_external/workspace/framedagain/languages/american/cases.tra~
+
+
+///////////////////////////////////////
+// ADD NECESSARY ITEMS AND DIALOGUES //
+///////////////////////////////////////
+BEGIN @5   // MOD 0
+LABEL "#L-FRAMED2-MAIN"
+/////////////////////////////////////
+//
+// UNCOMMENT THIS LINE WHEN THE COMPONENT IS INSTALLED IN TRANSITIONS
+// IF DO IT NOW, GET WARNINGS
+//
+//REQUIRE_PREDICATE !(MOD_IS_INSTALLED ~transitions.tp2~ (ID_OF_LABEL ~transitions.tp2~ "#L-FRAMED2-MAIN")) @3
+//
+///////////////////////////////////////
+INCLUDE ~framedagain/components/main_framed.tpa~
+LAF main_framed END
+
+
+/////////////////////////////////////////////////
+// QUEST TO FIND AND RETURN SKIE'S SOUL DAGGER //
+/////////////////////////////////////////////////
+BEGIN @6    // MOD 10
+DESIGNATED 10
+LABEL "#L-FRAMED2-QUEST"
+REQUIRE_PREDICATE (MOD_IS_INSTALLED ~framedagain.tp2~ 0) @4
+INCLUDE ~framedagain/components/framed_quest.tpa~
+LAF framed_quest END
+
